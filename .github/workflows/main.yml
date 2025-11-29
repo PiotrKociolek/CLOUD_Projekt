@@ -1,0 +1,35 @@
+substitutions:
+  _REGION: "europe-west1"
+  _SERVICE: "demo-backend"
+  _REPO: "api-repo"
+  _IMAGE: "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA"
+
+steps:
+
+# ---- Build image ----
+- name: "gcr.io/cloud-builders/docker"
+  args: ["build", "-t", "${_IMAGE}", "."]
+
+# ---- Push image to Artifact Registry ----
+- name: "gcr.io/cloud-builders/docker"
+  args: ["push", "${_IMAGE}"]
+
+# ---- Deploy to Cloud Run ----
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  entrypoint: gcloud
+  args:
+    [
+      "run",
+      "deploy",
+      "${_SERVICE}",
+      "--image",
+      "${_IMAGE}",
+      "--region",
+      "${_REGION}",
+      "--platform",
+      "managed",
+      "--allow-unauthenticated",
+    ]
+
+images:
+  - "${_IMAGE}"
