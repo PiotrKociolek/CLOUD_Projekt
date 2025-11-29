@@ -16,6 +16,7 @@ RUN dotnet build "CLOUD.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish layer
 FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "CLOUD.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Final runtime image
